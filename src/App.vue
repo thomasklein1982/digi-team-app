@@ -1,30 +1,62 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
+
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <component :is="currentView" :sub-path="subPath"/>
+  <Navbar :current-path="currentPath"/>
 </template>
 
+<script>
+import Activities from './components/activities.vue';
+import Home from './components/home.vue';
+import Navbar from './components/navbar.vue';
+import Teamstunden from './components/teamstunden.vue';
+import {version} from '../package.json';
+
+
+const routes={
+  '/': Home,
+  '/teamstunden': Teamstunden,
+  '/activities': Activities
+};
+
+function getPathAndSubPath(hash){
+  hash=hash.slice(1) || "/";
+  if(hash.length===1) return { path: hash, subPath: null};
+  let s=hash.split("/");
+  return {
+    path: "/"+s[1], subPath: s[2]
+  }
+}
+
+export default{
+  components: {
+    Navbar
+  },
+  computed: {
+    currentView() {
+      return routes[this.currentPath];
+    }
+  },
+  data(){
+    return {
+      currentPath: window.location.hash,
+      subPath: null,
+      version
+    }
+  },
+  mounted() {
+    window.addEventListener('hashchange', () => {
+      let ps=getPathAndSubPath(window.location.hash);
+      this.currentPath = ps.path;
+      this.subPath=ps.subPath;
+    });
+    let ps=getPathAndSubPath(window.location.hash);
+    this.currentPath = ps.path;
+    this.subPath=ps.subPath;
+  }
+};
+</script>
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+
 </style>
